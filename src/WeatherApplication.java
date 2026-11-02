@@ -1,3 +1,6 @@
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -6,7 +9,7 @@ import java.net.http.HttpResponse;
 
 public class WeatherApplication {
     private static final String API_URL =
-            "https://api.weather.yandex.ru/v2/forecast?lat=55.75&lon=37.62&limit=3";
+            "https://api.weather.yandex.ru/v2/forecast?lat=44.82&lon=20.46&limit=3";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         String apiKey = System.getenv("YANDEX_WEATHER_API_KEY");
@@ -33,7 +36,28 @@ public class WeatherApplication {
             );
 
             if (response.statusCode() == 200) {
-                System.out.println(response.body());
+                String json = response.body();
+                System.out.println(json);
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode root = objectMapper.readTree(json);
+
+                int currentTemperature = root.get("fact").get("temp").asInt();
+
+                double temperatureSum = 0;
+                int forecastCount = 0;
+
+                for (JsonNode forecast : root.get("forecasts")) {
+                    JsonNode dayTemperature = forecast.get("parts").get("day").get("temp_avg");
+
+                    temperatureSum += dayTemperature.asDouble();
+                    forecastCount++;
+                }
+
+                double averageTemperature = temperatureSum / forecastCount;
+
+                System.out.println("Current temp: " + currentTemperature + " celsius");
+                System.out.println("Avg daytime temp: " + averageTemperature + " celsius");
             } else {
                 System.err.println("HTTP err code: " + response.statusCode());
                 System.err.println(response.body());
