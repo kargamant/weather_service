@@ -57,7 +57,7 @@ public class WeatherApplication {
                 double averageTemperature = temperatureSum / forecastCount;
 
                 System.out.println("Current temp: " + currentTemperature + " celsius");
-                System.out.println("Avg daytime temp: " + averageTemperature + " celsius");
+                System.out.printf("Avg daytime temp: %.2f celsius%n", averageTemperature);
             } else {
                 System.err.println("HTTP err code: " + response.statusCode());
                 System.err.println(response.body());
